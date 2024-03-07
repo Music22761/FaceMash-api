@@ -3,6 +3,11 @@ import { conn } from "../connectdb";
 import { UserPostRequest } from "../model/userPostRequest";
 import mysql from "mysql";
 import util from "util";
+import multer from "multer";
+import path from "path";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { app } from "../filebase_con";
+import { storage } from "../filebase_con";
 
 export const router = express.Router();
 
@@ -30,7 +35,10 @@ router.get("/idx", (req, res) => {
   //   res.json("this is Users page")
 });
 
-router.post("/register", (req, res) => {
+
+router.post("/",(req, res) => {
+  //upload รูปภาพลง firebase
+  //เก็บข้อมูลลง database
   let user: UserPostRequest = req.body;
   let sql =
     "INSERT INTO `Users`(`name`, `email`, `password`,`picture`,`role`) VALUES (?,?,?,?,?)";
