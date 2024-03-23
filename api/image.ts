@@ -5,7 +5,7 @@ import multer from "multer";
 import mysql from 'mysql'
 import { conn } from '../connectdb'
 import path from "path";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { app } from "../filebase_con";
 import { storage } from "../filebase_con";
 
@@ -50,6 +50,14 @@ router.post(
   }
 );
 
+router.delete("/paths",async (req, res) => {
+  const path = req.query.path;
+  console.log("In delete func:  "+path);
+  
+  // res.send("Path: "+path)
+  await firebaseDelete(String(path));
+});
+
 async function firebaseUpload(file: Express.Multer.File) {
   // Upload to firebase storage
   const filename = Date.now() + "-" + Math.round(Math.random() * 1000) + ".png";
@@ -67,4 +75,15 @@ async function firebaseUpload(file: Express.Multer.File) {
   const url = await getDownloadURL(snapshost.ref);
 
   return url;
+}
+
+// ลบรูปภาพใน firebase
+async function firebaseDelete(path: string) {
+  console.log("In firebase Delete:"+path);
+  
+  const storageRef = ref(
+    storage,
+    "/images/" + path.split("/images/")[1].split("?")[0]
+  );
+  const snapshost = await deleteObject(storageRef);
 }
