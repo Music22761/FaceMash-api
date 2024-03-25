@@ -14,6 +14,7 @@ router.get("/", (req, res) => {
   });
 });
 
+
 router.get("/:id", (req, res) => {
   if (req.query.id) {
     res.send("call get in Pictures with Query Param " + req.query.id);
@@ -96,6 +97,22 @@ router.delete("/:id", (req, res) => {
   conn.query("delete from Vote where id = ?", [id], (err, result) => {
     if (err) throw err;
     res.status(200).json({ affected_row: result.affectedRows });
+  });
+});
+
+router.put("/edit/null/:id", (req, res) => {
+  let pictureId = +req.params.id;
+  let vote: VotePostRequest = req.body;
+  let sql =
+    "update  `Vote` set `vote_at`= NULL, `user_id`= NULL, `picture_id`= NULL, `score`= NULL where `picture_id`=?";
+  sql = mysql.format(sql, [
+    pictureId
+  ]);
+  conn.query(sql, (err, result) => {
+    if (err) throw err;
+    res
+      .status(201)
+      .json({ affected_row: result.affectedRows });
   });
 });
 
