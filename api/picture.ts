@@ -49,38 +49,6 @@ router.get("/rankYesterday", (req, res) => {
   );
 });
 
-router.get("/rankYesterday/:picture_id", (req, res) => {
-
-
-  conn.query(
-    `WITH MaxVote AS (
-      SELECT 
-          id, vote_at, user_id, picture_id, score, 
-          ROW_NUMBER() OVER (PARTITION BY picture_id ORDER BY vote_at DESC) AS rn
-      FROM 
-          Vote
-      WHERE 
-          vote_at <= CURDATE() AND picture_id IS NOT NULL
-  )
-  SELECT 
-      m.id, m.vote_at, m.user_id, m.picture_id, m.score, 
-      ROW_NUMBER() OVER (ORDER BY m.score DESC) AS ranking,
-      p.name, p.path
-  FROM 
-      MaxVote m
-  JOIN 
-      Pictures p ON m.picture_id = p.id
-  WHERE 
-      m.rn = 1
-      AND m.picture_id = ${req.params.picture_id}
-  ORDER BY 
-      m.score DESC;
-    `,
-    (err, result, fields) => {
-      res.status(200).json(result);
-    }
-  );
-});
 
 router.get("/:id", (req, res) => {
   if (req.query.id) {
