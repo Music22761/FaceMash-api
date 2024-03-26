@@ -47,16 +47,36 @@ router.get("/picture/:id", async (req, res) => {
         user_id,
         picture_id,
         score
-        FROM
+    FROM
         Vote
-        WHERE
+    WHERE
         DATE(vote_at) = '${formattedDate}' AND 
         TIME(vote_at) = (
             SELECT MAX(TIME(vote_at))
             FROM Vote
             WHERE DATE(vote_at) = '${formattedDate}' AND picture_id = ${req.params.id}
         ) AND 
-        picture_id = ${req.params.id};`,
+        picture_id = ${req.params.id}
+    
+    UNION
+    
+    SELECT
+        id AS vote_id,
+        vote_at AS date_time,
+        user_id,
+        picture_id,
+        score
+    FROM
+        Vote
+    WHERE
+        DATE(vote_at) = (
+            SELECT MAX(DATE(vote_at))
+            FROM Vote
+            WHERE DATE(vote_at) < '${formattedDate}' AND picture_id = ${req.params.id}
+        ) AND 
+        picture_id = ${req.params.id}
+    ORDER BY date_time DESC
+    LIMIT 1;`,
 
         (err, result) => {
           if (err) {
